@@ -23,8 +23,6 @@ class ChatController extends Controller
 
         return response()->json($messages);
     }
-
-
     public function sendMessage(Request $request)
     {
         $message = new Message();
@@ -42,6 +40,4 @@ class ChatController extends Controller
         $selectedUserId = $request->input('selectedUserId');
         return view('chat', compact('users', 'selectedUserId'));
     }
-
-
 }

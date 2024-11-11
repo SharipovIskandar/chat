@@ -69,7 +69,11 @@
                             messageElement.classList.add('mb-2', 'flex', msg.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
 
                             const bubble = document.createElement('div');
-                            bubble.classList.add('p-2', 'rounded', 'max-w-xs', msg.sender_id === {{ Auth::id() }} ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800');
+                            const bubbleClass = (msg.sender_id === {{ Auth::id() }})
+                                ? ['p-2', 'rounded', 'max-w-xs', 'bg-blue-500', 'text-white']
+                                : ['p-2', 'rounded', 'max-w-xs', 'bg-gray-300', 'text-gray-800'];
+
+                            bubble.classList.add(...bubbleClass);
                             bubble.textContent = msg.message;
 
                             messageElement.appendChild(bubble);
