@@ -10,35 +10,23 @@ services:
         networks:
             - app-network
         depends_on:
-            - postgres
+            - mysql
 
-    postgres:
-        image: postgres
-        container_name: postgres
-        restart: always
-        environment:
-            POSTGRES_DB: ${DB_DATABASE}
-            POSTGRES_USER: ${DB_USERNAME}
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
-        volumes:
-            - postgres_data:/var/lib/postgresql/data
-        networks:
-            - app-network
-        expose:
-            - 5432
-
-    pgadmin:
-        image: dpage/pgadmin4
-        container_name: rent_pgadmin
+    mysql:
+        image: mysql:8.0  # MySQL versiyasini tanlang
+        container_name: mysql
         restart: unless-stopped
         environment:
-            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-        ports:
-            - "8081:80"
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}  # Root parolini belgilang
+        volumes:
+            - mysql_data:/var/lib/mysql
         networks:
             - app-network
-
+        ports:
+            - "3307:3306"
     web:
         container_name: rent_web
         image: nginx:alpine
@@ -63,7 +51,7 @@ services:
         command: bash -c "npm install && npm run build"
 
 volumes:
-    postgres_data:
+    mysql_data:
 
 networks:
     app-network:
