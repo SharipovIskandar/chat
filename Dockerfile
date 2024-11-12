@@ -22,5 +22,7 @@ COPY . /var/www
 
 RUN composer install
 
+RUN docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip
+
 RUN chown -R www-data:www-data /var/www
 RUN chmod -R 755 /var/www
