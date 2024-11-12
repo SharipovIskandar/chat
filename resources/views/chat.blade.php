@@ -21,7 +21,6 @@
         <div class="flex-1 p-6 flex flex-col">
             <div class="flex-1 bg-white rounded-lg shadow-lg dark:bg-gray-700 dark:text-white flex flex-col">
                 <div id="chatBox" class="flex-1 p-6 border-b border-gray-300 rounded-t-lg overflow-y-auto dark:border-gray-600" style="max-height: calc(100vh - 100px);">
-                    <!-- Xabarlar shu yerda ko'rsatiladi -->
                 </div>
                 <form id="messageForm" class="flex items-center mt-4">
                     <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-4 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition duration-200 ease-in-out shadow-lg"/>
@@ -86,13 +85,13 @@
                             bubble.appendChild(timestamp);
                             chatBox.appendChild(messageElement);
                         });
+                        scrollBottom();
                     })
                     .catch(error => console.error('Xabarlarni yuklashda xato:', error));
 
                 longPollForNewMessages(userId);  // Long pollingni chaqirish
             }
 
-            // Xabarlarni yuborish
             messageForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (messageInput.value.trim() !== '' && selectedUserId) {
@@ -125,6 +124,7 @@
                                 bubble.appendChild(timestamp);
                                 chatBox.appendChild(messageElement);
                                 messageInput.value = '';
+                                scrollBottom();
                             }
                         })
                         .catch(error => console.error('Xabar yuborishda xato:', error));
@@ -156,13 +156,19 @@
 
                             bubble.appendChild(timestamp);
                             chatBox.appendChild(messageElement);
+                            scrollBottom();
                         }
-                        longPollForNewMessages(userId); // O'zgarishlarni doimiy ravishda tekshirish
+                        longPollForNewMessages(userId);
                     })
                     .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
             }
 
             if (selectedUserId) loadMessages(selectedUserId);
         });
+
+        function scrollBottom() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
     </script>
 @endsection

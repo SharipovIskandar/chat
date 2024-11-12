@@ -9,17 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
-    // Chat sahifasini ko'rsatish uchun index metodi
     public function index()
     {
-        // Hozirgi foydalanuvchi ma'lumotlarini olish
-        $users = User::where('id', '!=', Auth::id())->get(); // Faqat boshqa foydalanuvchilar
-        $selectedUserId = null; // Boshlang'ich foydalanuvchi tanlanmagan
+        $users = User::where('id', '!=', Auth::id())->get();
+        $selectedUserId = null;
 
         return view('chat', compact('users', 'selectedUserId'));
     }
 
-    // Foydalanuvchilar o'rtasida xabarlarni yuklash
     public function loadMessages($userId)
     {
         $messages = Message::where(function($query) use ($userId) {
@@ -33,7 +30,6 @@ class ChatController extends Controller
         return response()->json($messages);
     }
 
-    // Yangi xabarni yuborish
     public function sendMessage(Request $request)
     {
         $validated = $request->validate([
@@ -50,7 +46,6 @@ class ChatController extends Controller
         return response()->json(['success' => true, 'message' => $message]);
     }
 
-    // Long polling orqali xabarlarni olish
     public function longPolling($userId)
     {
         $lastMessage = Message::where(function ($query) use ($userId) {
@@ -62,7 +57,7 @@ class ChatController extends Controller
             ->first();
 
         if ($lastMessage && !session()->has('last_message_time') || strtotime($lastMessage->created_at) > session('last_message_time')) {
-            session(['last_message_time' => strtotime($lastMessage->created_at)]); // Xabar yuborilgandan keyin vaqtni saqlash
+            session(['last_message_time' => strtotime($lastMessage->created_at)]);
             return response()->json(['message' => $lastMessage]);
         }
 
