@@ -142,70 +142,56 @@
                                 // Yangi xabar bo'lsa, uni foydalanuvchiga ko'rsatish
                                 playNotificationSoundWhenLoadMessage();
 
-                                const messageElement = document.createElement('div');
-                                messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
+                                // Faqat yangi xabarni ko'rsatish
+                                const existingMessages = chatBox.querySelectorAll('.message');
+                                const alreadySeen = Array.from(existingMessages).some(msg => msg.dataset.messageId === newMessage.id.toString());
 
-                                const bubble = document.createElement('div');
-                                const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
-                                    ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
-                                    : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
+                                if (!alreadySeen) {
+                                    const messageElement = document.createElement('div');
+                                    messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
+                                    messageElement.classList.add('message');
+                                    messageElement.dataset.messageId = newMessage.id;
 
-                                bubble.classList.add(...bubbleClass);
-                                bubble.textContent = newMessage.message;
+                                    const bubble = document.createElement('div');
+                                    const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
+                                        ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
+                                        : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
 
-                                messageElement.appendChild(bubble);
+                                    bubble.classList.add(...bubbleClass);
+                                    bubble.textContent = newMessage.message;
 
-                                const timestamp = document.createElement('div');
-                                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                                const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                timestamp.textContent = messageTime;
+                                    messageElement.appendChild(bubble);
 
-                                bubble.appendChild(timestamp);
-                                chatBox.appendChild(messageElement);
-                                scrollBottom();
+                                    const timestamp = document.createElement('div');
+                                    timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
+                                    const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    timestamp.textContent = messageTime;
+
+                                    bubble.appendChild(timestamp);
+                                    chatBox.appendChild(messageElement);
+                                    scrollBottom();
+                                }
                             }
                         })
                         .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
                 }, 5000); // Har 5 sekundda xabarni tekshirish
             }
 
-
             if (selectedUserId) loadMessages(selectedUserId);
+
+            function scrollBottom() {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            function playNotificationSoundWhenLoadMessage() {
+                const audio = new Audio("/sounds/message_received.mp3");
+                audio.play();
+            }
+
+            function playNotificationSoundWhenSendMessage() {
+                const audio = new Audio("/sounds/message_sent.mp3");
+                audio.play();
+            }
         });
-
-        function scrollBottom() {
-            const chatBox = document.getElementById('chatBox');
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-        if(Notification.permission === "default"){
-            Notification.requestPermission().then(permission => {
-                if(permission === "granted"){
-                    const notificationOptions = {
-                        body: "Sizga yangi habar bor",
-                        tag:  "new-message"
-                    }
-                    let notification = new Notification("Yangi habar bor!!!!!!", notificationOptions);
-
-                    notification.onclick = () => {
-                        window.open("https://example.com")
-                        notification.close()
-                    };
-                    notification.onclose = () => {
-                        console.log("Bildirishnoma yopildi!")
-                    }
-                }else{
-                    console.log("Bildirish nomalar rad etildi! Bilganingni qil Jetli")
-                }
-            })
-        }
-        function playNotificationSoundWhenLoadMessage(){
-            const audio = new Audio('/build/assets/mixkit-bell-notification-933.wav');
-            audio.play();
-        }
-
-        function playNotificationSoundWhenSendMessage(){
-            const audio = new Audio('/build/assets/sentmessage_1.mp3');
-            audio.play();
-        }
     </script>
 @endsection

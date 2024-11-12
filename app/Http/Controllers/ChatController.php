@@ -56,8 +56,15 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if ($lastMessage && $lastMessage->created_at > now()->subSeconds(5)) {
-            return response()->json(['message' => $lastMessage]);
+        if ($lastMessage) {
+            // Xabar faqat foydalanuvchi ko'rmagan bo'lsa qaytaring
+            $lastMessageTime = $lastMessage->created_at;
+            $lastSeenTime = session('last_seen_time', now()->subSeconds(10)); // Agar xabarlar tekshirilmagan bo'lsa, 10 soniya oldin deb olinadi
+            if ($lastMessageTime > $lastSeenTime) {
+                // Xabarni ko'rsatish
+                session(['last_seen_time' => now()]); // Yangi xabar ko'rsatilgandan so'ng vaqtni yangilash
+                return response()->json(['message' => $lastMessage]);
+            }
         }
 
         return response()->json(['message' => null]);
