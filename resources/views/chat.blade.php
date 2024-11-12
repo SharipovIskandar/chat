@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('sidebar')
-    <div class="w-full md:w-1/4 p-4 bg-gradient-to-br from-blue-50 to-indigo-100 border-r border-gray-300 h-screen overflow-y-auto shadow-lg dark:bg-gray-800 dark:border-gray-600">
+    <div class="w-full md:w-1/4 p-4 bg-gradient-to-br from-blue-50 to-indigo-100 border-r border-gray-300 h-screen shadow-lg dark:bg-gray-800 dark:border-gray-600 overflow-y-auto">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Foydalanuvchilar</h2>
         @foreach($users as $user)
             <a href="javascript:void(0);" class="block p-4 rounded-lg mb-4 hover:bg-blue-200 user-item {{ $selectedUserId == $user->id ? 'bg-blue-500 text-white' : 'bg-gray-100' }} dark:hover:bg-blue-700 dark:bg-gray-600 dark:text-white transition-colors duration-200 ease-in-out" data-user-id="{{ $user->id }}">
@@ -17,17 +17,17 @@
 @endsection
 
 @section('content')
-    <div class="flex flex-1">
+    <div class="flex flex-1 h-screen">
         <!-- Right: Chat Box -->
-        <div class="flex-1 p-6">
-            <div class="flex flex-col h-full bg-white rounded-lg shadow-lg dark:bg-gray-700 dark:text-white">
+        <div class="flex-1 p-6 flex flex-col">
+            <div class="flex-1 bg-white rounded-lg shadow-lg dark:bg-gray-700 dark:text-white flex flex-col">
                 <!-- Chat Messages -->
-                <div id="chatBox" class="flex-1 p-4 border-b border-gray-300 rounded-t-lg overflow-y-auto hidden dark:border-gray-600">
+                <div id="chatBox" class="flex-1 p-4 border-b border-gray-300 rounded-t-lg overflow-y-auto dark:border-gray-600" style="max-height: calc(100vh - 100px);">
                     <!-- Xabarlar shu yerda ko'rsatiladi -->
                 </div>
 
                 <!-- Xabar Yozish Inputi -->
-                <form id="messageForm" class="mt-6 flex items-center hidden">
+                <form id="messageForm" class="flex items-center mt-2">
                     <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-4 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition duration-200 ease-in-out shadow-md" />
                     <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-r-lg ml-2 transition-all duration-200 ease-in-out dark:bg-blue-600 dark:hover:bg-blue-700">Yuborish</button>
                 </form>
@@ -108,9 +108,6 @@
                             bubble.appendChild(timestamp); // Vaqtni xabar bubble oxiriga qo'shish
                             chatBox.appendChild(messageElement);
                         });
-
-                        // Chat oynasini pastga siljitish
-                        chatBox.scrollTop = chatBox.scrollHeight;
                     })
                     .catch(error => {
                         console.error('Xabarlarni yuklashda xato:', error);
@@ -154,9 +151,6 @@
 
                                 bubble.appendChild(timestamp); // Vaqtni xabar bubble oxiriga qo'shish
                                 chatBox.appendChild(messageElement);
-
-                                // Chat oynasini pastga siljitish
-                                chatBox.scrollTop = chatBox.scrollHeight;
 
                                 // Inputni tozalash
                                 messageInput.value = '';
