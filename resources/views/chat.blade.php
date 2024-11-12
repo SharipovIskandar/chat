@@ -177,7 +177,6 @@
                 if(permission === "granted"){
                     const notificationOptions = {
                         body: "Sizga yangi habar bor",
-                        icon: "https://example.com",
                         tag:  "new-message"
                     }
                     let notification = new Notification("Yangi habar bor!!!!!!", notificationOptions);
