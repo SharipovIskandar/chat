@@ -1,5 +1,3 @@
-<!-- resources/views/layouts/app.blade.php -->
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -10,10 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     @yield('styles')
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans">
 <div class="flex h-screen">
     @yield('sidebar')
-    <div class="flex-1">
+    <div class="flex-1 bg-gray-100 dark:bg-gray-800">
         @yield('content')
     </div>
 </div>

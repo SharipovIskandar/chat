@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('sidebar')
-    <div class="w-full md:w-1/4 p-4 bg-gradient-to-br from-blue-50 to-indigo-100 border-r border-gray-300 h-screen shadow-lg dark:bg-gray-800 dark:border-gray-600 overflow-y-auto">
+    <div class="w-full md:w-1/4 p-6 bg-gradient-to-br from-indigo-200 to-blue-400 border-r border-gray-300 h-screen shadow-xl dark:bg-gray-800 dark:border-gray-600 overflow-y-auto">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Foydalanuvchilar</h2>
         @foreach($users as $user)
-            <a href="javascript:void(0);" class="block p-4 rounded-lg mb-4 hover:bg-blue-200 user-item {{ $selectedUserId == $user->id ? 'bg-blue-500 text-white' : 'bg-gray-100' }} dark:hover:bg-blue-700 dark:bg-gray-600 dark:text-white transition-colors duration-200 ease-in-out" data-user-id="{{ $user->id }}">
+            <a href="javascript:void(0);" class="block p-4 rounded-lg mb-4 hover:bg-indigo-200 user-item {{ $selectedUserId == $user->id ? 'bg-indigo-500 text-white' : 'bg-gray-100' }} dark:hover:bg-indigo-600 dark:bg-gray-700 dark:text-white transition-colors duration-200 ease-in-out" data-user-id="{{ $user->id }}">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white text-xl">
+                    <div class="w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl">
                         {{ substr($user->name, 0, 1) }}
                     </div>
                     <span class="ml-4 font-medium text-gray-700 dark:text-white">{{ $user->name }}</span>
@@ -18,18 +18,14 @@
 
 @section('content')
     <div class="flex flex-1 h-screen">
-        <!-- Right: Chat Box -->
         <div class="flex-1 p-6 flex flex-col">
             <div class="flex-1 bg-white rounded-lg shadow-lg dark:bg-gray-700 dark:text-white flex flex-col">
-                <!-- Chat Messages -->
-                <div id="chatBox" class="flex-1 p-4 border-b border-gray-300 rounded-t-lg overflow-y-auto dark:border-gray-600" style="max-height: calc(100vh - 100px);">
+                <div id="chatBox" class="flex-1 p-6 border-b border-gray-300 rounded-t-lg overflow-y-auto dark:border-gray-600" style="max-height: calc(100vh - 100px);">
                     <!-- Xabarlar shu yerda ko'rsatiladi -->
                 </div>
-
-                <!-- Xabar Yozish Inputi -->
-                <form id="messageForm" class="flex items-center mt-2">
-                    <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-4 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition duration-200 ease-in-out shadow-md" />
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-r-lg ml-2 transition-all duration-200 ease-in-out dark:bg-blue-600 dark:hover:bg-blue-700">Yuborish</button>
+                <form id="messageForm" class="flex items-center mt-4">
+                    <input type="text" id="messageInput" placeholder="Xabar yozing..." class="flex-1 p-4 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition duration-200 ease-in-out shadow-lg"/>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-r-lg ml-2 transition-all duration-200 ease-in-out dark:bg-indigo-600 dark:hover:bg-indigo-700">Yuborish</button>
                 </form>
             </div>
         </div>
@@ -45,43 +41,28 @@
             const messageInput = document.getElementById('messageInput');
             const messageForm = document.getElementById('messageForm');
             let selectedUserId = {{ $selectedUserId ?? 'null' }};
-
-            // CSRF Tokenni olish
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Foydalanuvchini tanlash
             userList.forEach(user => {
                 user.addEventListener('click', function () {
                     selectedUserId = this.getAttribute('data-user-id');
                     loadMessages(selectedUserId);
-
-                    // Tanlangan foydalanuvchining orqa fonini o'zgartirish
                     document.querySelectorAll('.user-item').forEach(item => {
-                        item.classList.remove('bg-blue-500', 'text-white');
+                        item.classList.remove('bg-indigo-500', 'text-white');
                         item.classList.add('bg-gray-100');
                     });
-                    this.classList.add('bg-blue-500', 'text-white');
-
-                    // Chatni ko'rsatish va Inputni ochish
+                    this.classList.add('bg-indigo-500', 'text-white');
                     chatBox.classList.remove('hidden');
                     messageForm.classList.remove('hidden');
                 });
             });
 
-            // Xabarlarni yuklash
             function loadMessages(userId) {
                 axios.get(`/messages/${userId}`)
                     .then(response => {
                         const messages = response.data;
-
-                        // Xabarlarni vaqtga ko'ra tartiblash
-                        messages.sort((a, b) => {
-                            const dateA = new Date(a.created_at);
-                            const dateB = new Date(b.created_at);
-                            return dateA - dateB;
-                        });
-
-                        chatBox.innerHTML = ''; // Tozalash
+                        messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                        chatBox.innerHTML = '';
 
                         messages.forEach(msg => {
                             const messageElement = document.createElement('div');
@@ -89,7 +70,7 @@
 
                             const bubble = document.createElement('div');
                             const bubbleClass = (msg.sender_id === {{ Auth::id() }})
-                                ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-blue-500', 'text-white', 'shadow-lg', 'transition', 'duration-200', 'ease-in-out']
+                                ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
                                 : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
 
                             bubble.classList.add(...bubbleClass);
@@ -97,21 +78,18 @@
 
                             messageElement.appendChild(bubble);
 
-                            // Vaqtni ko'rsatish xabar oxirida
                             const timestamp = document.createElement('div');
                             timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                            const messageTime = new Date(msg.created_at).toLocaleTimeString([], {
-                                hour: '2-digit', minute: '2-digit'
-                            });
+                            const messageTime = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             timestamp.textContent = messageTime;
 
-                            bubble.appendChild(timestamp); // Vaqtni xabar bubble oxiriga qo'shish
+                            bubble.appendChild(timestamp);
                             chatBox.appendChild(messageElement);
                         });
                     })
-                    .catch(error => {
-                        console.error('Xabarlarni yuklashda xato:', error);
-                    });
+                    .catch(error => console.error('Xabarlarni yuklashda xato:', error));
+
+                longPollForNewMessages(userId);  // Long pollingni chaqirish
             }
 
             // Xabarlarni yuborish
@@ -119,7 +97,6 @@
                 e.preventDefault();
                 if (messageInput.value.trim() !== '' && selectedUserId) {
                     const message = messageInput.value.trim();
-
                     axios.post('/messages/send', {
                         receiver_id: selectedUserId,
                         message: message
@@ -130,42 +107,62 @@
                     })
                         .then(response => {
                             if (response.data.success) {
-                                // Xabarni chat oynasiga qo'shish
                                 const msg = response.data.message;
                                 const messageElement = document.createElement('div');
                                 messageElement.classList.add('mb-4', 'flex', 'justify-end');
 
                                 const bubble = document.createElement('div');
-                                bubble.classList.add('p-4', 'rounded-xl', 'max-w-xs', 'bg-blue-500', 'text-white', 'shadow-lg');
+                                bubble.classList.add('p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg');
                                 bubble.textContent = msg.message;
 
                                 messageElement.appendChild(bubble);
 
-                                // Vaqtni xabar oxirida ko'rsatish
                                 const timestamp = document.createElement('div');
                                 timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                                const messageTime = new Date(msg.created_at).toLocaleTimeString([], {
-                                    hour: '2-digit', minute: '2-digit'
-                                });
+                                const messageTime = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 timestamp.textContent = messageTime;
 
-                                bubble.appendChild(timestamp); // Vaqtni xabar bubble oxiriga qo'shish
+                                bubble.appendChild(timestamp);
                                 chatBox.appendChild(messageElement);
-
-                                // Inputni tozalash
                                 messageInput.value = '';
                             }
                         })
-                        .catch(error => {
-                            console.error('Xabar yuborishda xato:', error);
-                        });
+                        .catch(error => console.error('Xabar yuborishda xato:', error));
                 }
             });
 
-            // Agar biron bir foydalanuvchi oldin tanlangan bo'lsa, xabarlarni yuklash
-            if (selectedUserId) {
-                loadMessages(selectedUserId);
+            function longPollForNewMessages(userId) {
+                axios.get(`/messages/long-polling/${userId}`)
+                    .then(response => {
+                        const newMessage = response.data.message;
+                        if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
+                            const messageElement = document.createElement('div');
+                            messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
+
+                            const bubble = document.createElement('div');
+                            const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
+                                ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
+                                : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
+
+                            bubble.classList.add(...bubbleClass);
+                            bubble.textContent = newMessage.message;
+
+                            messageElement.appendChild(bubble);
+
+                            const timestamp = document.createElement('div');
+                            timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
+                            const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            timestamp.textContent = messageTime;
+
+                            bubble.appendChild(timestamp);
+                            chatBox.appendChild(messageElement);
+                        }
+                        longPollForNewMessages(userId); // O'zgarishlarni doimiy ravishda tekshirish
+                    })
+                    .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
             }
+
+            if (selectedUserId) loadMessages(selectedUserId);
         });
     </script>
 @endsection

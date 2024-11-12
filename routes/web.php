@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index']);
     Route::get('/messages/{userId}', [ChatController::class, 'loadMessages']);
     Route::post('/messages/send', [ChatController::class, 'sendMessage']);
+    Route::get('/messages/long-polling/{userId}', [ChatController::class, 'longPolling']);
 });
 
 Route::get("/logout", [ProfileController::class, 'destroy']);
