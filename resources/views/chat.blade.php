@@ -133,37 +133,42 @@
             });
 
             function longPollForNewMessages(userId) {
-                axios.get(`/messages/long-polling/${userId}`)
-                    .then(response => {
-                        const newMessage = response.data.message;
-                        if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
-                            playNotificationSoundWhenLoadMessage();
-                            const messageElement = document.createElement('div');
-                            messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
+                // Har 5 sekundda yangi xabarlarni tekshirish
+                setInterval(() => {
+                    axios.get(`/messages/long-polling/${userId}`)
+                        .then(response => {
+                            const newMessage = response.data.message;
+                            if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
+                                // Yangi xabar bo'lsa, uni foydalanuvchiga ko'rsatish
+                                playNotificationSoundWhenLoadMessage();
 
-                            const bubble = document.createElement('div');
-                            const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
-                                ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
-                                : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
+                                const messageElement = document.createElement('div');
+                                messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
 
-                            bubble.classList.add(...bubbleClass);
-                            bubble.textContent = newMessage.message;
+                                const bubble = document.createElement('div');
+                                const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
+                                    ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
+                                    : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
 
-                            messageElement.appendChild(bubble);
+                                bubble.classList.add(...bubbleClass);
+                                bubble.textContent = newMessage.message;
 
-                            const timestamp = document.createElement('div');
-                            timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                            const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            timestamp.textContent = messageTime;
+                                messageElement.appendChild(bubble);
 
-                            bubble.appendChild(timestamp);
-                            chatBox.appendChild(messageElement);
-                            scrollBottom();
-                        }
-                        longPollForNewMessages(userId);
-                    })
-                    .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
+                                const timestamp = document.createElement('div');
+                                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
+                                const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                timestamp.textContent = messageTime;
+
+                                bubble.appendChild(timestamp);
+                                chatBox.appendChild(messageElement);
+                                scrollBottom();
+                            }
+                        })
+                        .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
+                }, 5000); // Har 5 sekundda xabarni tekshirish
             }
+
 
             if (selectedUserId) loadMessages(selectedUserId);
         });

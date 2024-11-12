@@ -56,12 +56,12 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if ($lastMessage && !session()->has('last_message_time') || strtotime($lastMessage->created_at) > session('last_message_time')) {
-            session(['last_message_time' => strtotime($lastMessage->created_at)]);
+        if ($lastMessage && $lastMessage->created_at > now()->subSeconds(5)) {
             return response()->json(['message' => $lastMessage]);
         }
 
         return response()->json(['message' => null]);
     }
+
 
 }
