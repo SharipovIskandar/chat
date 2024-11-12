@@ -89,7 +89,7 @@
                     })
                     .catch(error => console.error('Xabarlarni yuklashda xato:', error));
 
-                longPollForNewMessages(userId);  // Long pollingni chaqirish
+                longPollForNewMessages(userId);
             }
 
             messageForm.addEventListener('submit', function (e) {
@@ -125,6 +125,7 @@
                                 chatBox.appendChild(messageElement);
                                 messageInput.value = '';
                                 scrollBottom();
+                                playNotificationSoundWhenSendMessage();
                             }
                         })
                         .catch(error => console.error('Xabar yuborishda xato:', error));
@@ -136,6 +137,7 @@
                     .then(response => {
                         const newMessage = response.data.message;
                         if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
+                            playNotificationSoundWhenLoadMessage();
                             const messageElement = document.createElement('div');
                             messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
 
@@ -169,6 +171,37 @@
         function scrollBottom() {
             const chatBox = document.getElementById('chatBox');
             chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        if(Notification.permission === "default"){
+            Notification.requestPermission().then(permission => {
+                if(permission === "granted"){
+                    const notificationOptions = {
+                        body: "Sizga yangi habar bor",
+                        icon: "https://example.com",
+                        tag:  "new-message"
+                    }
+                    let notification = new Notification("Yangi habar bor!!!!!!", notificationOptions);
+
+                    notification.onclick = () => {
+                        window.open("https://example.com")
+                        notification.close()
+                    };
+                    notification.onclose = () => {
+                        console.log("Bildirishnoma yopildi!")
+                    }
+                }else{
+                    console.log("Bildirish nomalar rad etildi! Bilganingni qil Jetli")
+                }
+            })
+        }
+        function playNotificationSoundWhenLoadMessage(){
+            const audio = new Audio('/build/assets/mixkit-bell-notification-933.wav');
+            audio.play();
+        }
+
+        function playNotificationSoundWhenSendMessage(){
+            const audio = new Audio('/build/assets/sentmessage_1.mp3');
+            audio.play();
         }
     </script>
 @endsection
