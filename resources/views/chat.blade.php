@@ -18,7 +18,6 @@
                 </div>
             </a>
         @endforeach
-
     </div>
 @endsection
 
@@ -52,9 +51,11 @@
                 user.addEventListener('click', function () {
                     selectedUserId = this.getAttribute('data-user-id');
                     loadMessages(selectedUserId);
+                    markMessagesAsRead(selectedUserId);
                     document.querySelectorAll('.user-item').forEach(item => {
                         item.classList.remove('bg-indigo-500', 'text-white');
                         item.classList.add('bg-gray-100');
+                        item.querySelector('.unread-count').textContent = ''; // O'qilmagan xabarlar sonini tozalash
                     });
                     this.classList.add('bg-indigo-500', 'text-white');
                     chatBox.classList.remove('hidden');
@@ -113,22 +114,7 @@
                         .then(response => {
                             if (response.data.success) {
                                 const msg = response.data.message;
-                                const messageElement = document.createElement('div');
-                                messageElement.classList.add('mb-4', 'flex', 'justify-end');
-
-                                const bubble = document.createElement('div');
-                                bubble.classList.add('p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg');
-                                bubble.textContent = msg.message;
-
-                                messageElement.appendChild(bubble);
-
-                                const timestamp = document.createElement('div');
-                                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                                const messageTime = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                timestamp.textContent = messageTime;
-
-                                bubble.appendChild(timestamp);
-                                chatBox.appendChild(messageElement);
+                                addMessageToChat(msg, 'justify-end', 'bg-indigo-500', 'text-white');
                                 messageInput.value = '';
                                 scrollBottom();
                                 playNotificationSoundWhenSendMessage();
@@ -138,120 +124,75 @@
                 }
             });
 
+            function addMessageToChat(msg, justifyClass, bgClass, textClass) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('mb-4', 'flex', justifyClass);
+
+                const bubble = document.createElement('div');
+                bubble.classList.add('p-4', 'rounded-xl', 'max-w-xs', bgClass, textClass, 'shadow-lg');
+                bubble.textContent = msg.message;
+
+                const timestamp = document.createElement('div');
+                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
+                const messageTime = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                timestamp.textContent = messageTime;
+
+                bubble.appendChild(timestamp);
+                messageElement.appendChild(bubble);
+                chatBox.appendChild(messageElement);
+            }
+
             function longPollForNewMessages(userId) {
-                // Har 5 sekundda yangi xabarlarni tekshirish
                 setInterval(() => {
                     axios.get(`/messages/long-polling/${userId}`)
                         .then(response => {
                             const newMessage = response.data.message;
+                            // Agar yangi xabar mavjud bo'lsa va uni yuborgan foydalanuvchining ID-si hozirgi foydalanuvchi ID-siga teng bo'lmasa
                             if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
                                 playNotificationSoundWhenLoadMessage();
-
-                                const messageElement = document.createElement('div');
-                                messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
-
-                                const bubble = document.createElement('div');
-                                const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
-                                    ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
-                                    : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
-
-                                bubble.classList.add(...bubbleClass);
-                                bubble.textContent = newMessage.message;
-
-                                messageElement.appendChild(bubble);
-
-                                const timestamp = document.createElement('div');
-                                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                                const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                timestamp.textContent = messageTime;
-
-                                bubble.appendChild(timestamp);
-                                chatBox.appendChild(messageElement);
+                                addMessageToChat(newMessage, 'justify-start', 'bg-gray-300', 'text-gray-800');
+                                updateUserLastMessage(userId, newMessage.message);
                                 scrollBottom();
                             }
                         })
                         .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
-                }, 10000); // Har 5 sekundda xabarni tekshirish
+                }, 2000);
             }
 
-
-            if (selectedUserId) loadMessages(selectedUserId);
-        });
-
-        function scrollBottom() {
-            const chatBox = document.getElementById('chatBox');
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-        if(Notification.permission === "default"){
-            Notification.requestPermission().then(permission => {
-                if(permission === "granted"){
-                    const notificationOptions = {
-                        body: "Sizga yangi habar bor",
-                        tag:  "new-message"
-                    }
-                    let notification = new Notification("Yangi habar bor!!!!!!", notificationOptions);
-
-                    notification.onclick = () => {
-                        window.open("https://example.com")
-                        notification.close()
-                    };
-                    notification.onclose = () => {
-                        console.log("Bildirishnoma yopildi!")
-                    }
-                }else{
-                    console.log("Bildirish nomalar rad etildi! Bilganingni qil Jetli")
-                }
-            })
-        }
-        function playNotificationSoundWhenLoadMessage(){
-            const audio = new Audio('/build/assets/mixkit-bell-notification-933.wav');
-            audio.play();
-        }
-
-        function playNotificationSoundWhenSendMessage(){
-            const audio = new Audio('/build/assets/sentmessage_1.mp3');
-            audio.play();
-        }
-        function observeMessages(){
-            const messagesContainer = document.getElementById("messages");
-
-            if (!messagesContainer) {
-                console.error("messages elementi topilmadi.");
-                return;
-            }
-            const observe = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                  if(entry.isIntersecting){
-                      const messageId = entry.target.getAttribute("data-message-id")
-                      markMessageAsRead(messageId)
-                      observe.unobserve(entry.target)
-                  }
-              })
-            }, {threshold: 1.0})
-            messages.forEach(message => observe.observe(message))
-        }
-        function markMessageAsRead(){
-            fetch(`/messages/mark-as-read/${messageId}`, {
-                method: 'POST',
-                headers: {
-                    "Content-type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ messageId: messageId })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success){
-                        console.log("xabar oqilgan deb belgilab qoyishdilar!")
-                    }
+            function markMessagesAsRead(userId) {
+                axios.post(`/messages/mark-as-read/${userId}`, {}, {
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
                 })
-                .catch(error => {
-                    console.error("Xatolik yuz berdi:", error);
-                });
-        }
-        document.addEventListener("DOMContentLoaded", function() {
-            observeMessages();
-        });
+                    .then(response => {
+                        if (response.data.success) {
+                            console.log("Xabarlar o'qildi deb belgilandi");
+                        }
+                    })
+                    .catch(error => console.error("Xatolik yuz berdi:", error));
+            }
 
+            function updateUserLastMessage(userId, messageText) {
+                const userElement = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                if (userElement) {
+                    const messagePreview = userElement.querySelector('p');
+                    messagePreview.textContent = messageText;
+                }
+            }
+
+            function scrollBottom() {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            function playNotificationSoundWhenLoadMessage() {
+                const audio = new Audio('/assets/sounds/samsung-notification-sound-bass-boosted.mp3');
+                audio.play();
+            }
+
+            function playNotificationSoundWhenSendMessage() {
+                const audio = new Audio('/assets/sounds/receive-message-sound.mp3');
+                audio.play();
+            }
+
+        });
     </script>
 @endsection
