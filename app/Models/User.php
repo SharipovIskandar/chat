@@ -51,7 +51,11 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($model) {
-            $model->user_id = (string) Str::uuid(); // `user_id` ni UUID formatida yaratadi
+            $model->user_id = (string) Str::uuid();
         });
+    }
+    public function lastMessage()
+    {
+        return $this->hasOne(Message::class, 'sender_id')->latestOfMany();
     }
 }

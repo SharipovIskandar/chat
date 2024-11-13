@@ -9,10 +9,16 @@
                     <div class="w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl">
                         {{ substr($user->name, 0, 1) }}
                     </div>
-                    <span class="ml-4 font-medium text-gray-700 dark:text-white">{{ $user->name }}</span>
+                    <div class="ml-4">
+                        <span class="font-medium text-gray-700 dark:text-white">{{ $user->name }}</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                            {{ $user->lastMessage ? $user->lastMessage->message : 'Xabar yo‘q' }}
+                        </p>
+                    </div>
                 </div>
             </a>
         @endforeach
+
     </div>
 @endsection
 
@@ -139,59 +145,113 @@
                         .then(response => {
                             const newMessage = response.data.message;
                             if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
-                                // Yangi xabar bo'lsa, uni foydalanuvchiga ko'rsatish
                                 playNotificationSoundWhenLoadMessage();
 
-                                // Faqat yangi xabarni ko'rsatish
-                                const existingMessages = chatBox.querySelectorAll('.message');
-                                const alreadySeen = Array.from(existingMessages).some(msg => msg.dataset.messageId === newMessage.id.toString());
+                                const messageElement = document.createElement('div');
+                                messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
 
-                                if (!alreadySeen) {
-                                    const messageElement = document.createElement('div');
-                                    messageElement.classList.add('mb-4', 'flex', newMessage.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start');
-                                    messageElement.classList.add('message');
-                                    messageElement.dataset.messageId = newMessage.id;
+                                const bubble = document.createElement('div');
+                                const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
+                                    ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
+                                    : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
 
-                                    const bubble = document.createElement('div');
-                                    const bubbleClass = (newMessage.sender_id === {{ Auth::id() }})
-                                        ? ['p-4', 'rounded-xl', 'max-w-xs', 'bg-indigo-500', 'text-white', 'shadow-lg']
-                                        : ['p-4', 'rounded-xl', 'max-w-xs', 'bg-gray-300', 'text-gray-800', 'shadow-lg'];
+                                bubble.classList.add(...bubbleClass);
+                                bubble.textContent = newMessage.message;
 
-                                    bubble.classList.add(...bubbleClass);
-                                    bubble.textContent = newMessage.message;
+                                messageElement.appendChild(bubble);
 
-                                    messageElement.appendChild(bubble);
+                                const timestamp = document.createElement('div');
+                                timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
+                                const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                timestamp.textContent = messageTime;
 
-                                    const timestamp = document.createElement('div');
-                                    timestamp.classList.add('text-xs', 'text-gray-500', 'mt-1', 'opacity-70');
-                                    const messageTime = new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                    timestamp.textContent = messageTime;
-
-                                    bubble.appendChild(timestamp);
-                                    chatBox.appendChild(messageElement);
-                                    scrollBottom();
-                                }
+                                bubble.appendChild(timestamp);
+                                chatBox.appendChild(messageElement);
+                                scrollBottom();
                             }
                         })
                         .catch(error => console.error('Xabarlar tekshirilishda xato:', error));
-                }, 5000); // Har 5 sekundda xabarni tekshirish
+                }, 10000); // Har 5 sekundda xabarni tekshirish
             }
+
 
             if (selectedUserId) loadMessages(selectedUserId);
-
-            function scrollBottom() {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-
-            function playNotificationSoundWhenLoadMessage() {
-                const audio = new Audio("/sounds/message_received.mp3");
-                audio.play();
-            }
-
-            function playNotificationSoundWhenSendMessage() {
-                const audio = new Audio("/sounds/message_sent.mp3");
-                audio.play();
-            }
         });
+
+        function scrollBottom() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        if(Notification.permission === "default"){
+            Notification.requestPermission().then(permission => {
+                if(permission === "granted"){
+                    const notificationOptions = {
+                        body: "Sizga yangi habar bor",
+                        tag:  "new-message"
+                    }
+                    let notification = new Notification("Yangi habar bor!!!!!!", notificationOptions);
+
+                    notification.onclick = () => {
+                        window.open("https://example.com")
+                        notification.close()
+                    };
+                    notification.onclose = () => {
+                        console.log("Bildirishnoma yopildi!")
+                    }
+                }else{
+                    console.log("Bildirish nomalar rad etildi! Bilganingni qil Jetli")
+                }
+            })
+        }
+        function playNotificationSoundWhenLoadMessage(){
+            const audio = new Audio('/build/assets/mixkit-bell-notification-933.wav');
+            audio.play();
+        }
+
+        function playNotificationSoundWhenSendMessage(){
+            const audio = new Audio('/build/assets/sentmessage_1.mp3');
+            audio.play();
+        }
+        function observeMessages(){
+            const messagesContainer = document.getElementById("messages");
+
+            if (!messagesContainer) {
+                console.error("messages elementi topilmadi.");
+                return;
+            }
+            const observe = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                  if(entry.isIntersecting){
+                      const messageId = entry.target.getAttribute("data-message-id")
+                      markMessageAsRead(messageId)
+                      observe.unobserve(entry.target)
+                  }
+              })
+            }, {threshold: 1.0})
+            messages.forEach(message => observe.observe(message))
+        }
+        function markMessageAsRead(){
+            fetch(`/messages/mark-as-read/${messageId}`, {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ messageId: messageId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        console.log("xabar oqilgan deb belgilab qoyishdilar!")
+                    }
+                })
+                .catch(error => {
+                    console.error("Xatolik yuz berdi:", error);
+                });
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            observeMessages();
+        });
+
     </script>
 @endsection

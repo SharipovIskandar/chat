@@ -11,7 +11,7 @@ class ChatController extends Controller
 {
     public function index()
     {
-        $users = User::where('id', '!=', Auth::id())->get();
+        $users = User::where('id', '!=', Auth::id())->with("lastMessage")->get();
         $selectedUserId = null;
 
         return view('chat', compact('users', 'selectedUserId'));
@@ -70,5 +70,19 @@ class ChatController extends Controller
         return response()->json(['message' => null]);
     }
 
+    public function markAsRead($messageId)
+    {
+        $message = Message::where('id', $messageId)
+            ->where('receiver_id', auth()->id())
+            ->first();
 
+        if ($message) {
+            $message->is_read = true;
+            $message->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
 }

@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages/{userId}', [ChatController::class, 'loadMessages']);
     Route::post('/messages/send', [ChatController::class, 'sendMessage']);
     Route::get('/messages/long-polling/{userId}', [ChatController::class, 'longPolling']);
+    Route::post('/messages/mark-as-read/{messageId}', [ChatController::class, 'markAsRead']);
 });
 
 Route::get("/logout", [ProfileController::class, 'destroy']);

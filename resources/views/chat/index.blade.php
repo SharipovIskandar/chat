@@ -49,10 +49,8 @@
             const messageForm = document.getElementById('messageForm');
             let selectedUserId = null;
 
-            // CSRF Tokenni olish
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Foydalanuvchini tanlash
             userList.forEach(user => {
                 user.addEventListener('click', function () {
                     selectedUserId = this.getAttribute('data-user-id');
