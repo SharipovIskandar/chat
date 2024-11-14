@@ -61,8 +61,7 @@ class ChatController extends Controller
             $lastMessageTime = $lastMessage->created_at;
             $lastSeenTime = session('last_seen_time', now()->subSeconds(10)); // Agar xabarlar tekshirilmagan bo'lsa, 10 soniya oldin deb olinadi
             if ($lastMessageTime > $lastSeenTime) {
-                // Xabarni ko'rsatish
-                session(['last_seen_time' => now()]); // Yangi xabar ko'rsatilgandan so'ng vaqtni yangilash
+                session(['last_seen_time' => now()]);
                 return response()->json(['message' => $lastMessage]);
             }
         }

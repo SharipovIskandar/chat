@@ -1,0 +1,372 @@
+/* Global chat style */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7fc;
+}
+
+/* Chat Container */
+#chatBox {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Chat Bubble */
+.message-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble.sent {
+    background-color: #0084ff;
+    color: white;
+    align-self: flex-end;
+}
+
+.message-bubble.received {
+    background-color: #f0f0f0;
+    color: #333;
+    align-self: flex-start;
+}
+
+/* User messages */
+.message-time {
+    position: absolute;
+    bottom: -18px;
+    right: 5px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Input area */
+#messageInput {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-right: 10px;
+}
+
+#messageInput:focus {
+    border-color: #0084ff;
+    outline: none;
+}
+
+button {
+    background-color: #0084ff;
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #005bb5;
+}
+
+/* Sidebar */
+#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 250px;
+    background: #4c65b7;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.user-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #6c7bca;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.user-item:hover {
+    background-color: #4c65b7;
+}
+
+.user-item.selected {
+    background-color: #1e2a52;
+}
+
+.user-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.user-last-message {
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+/* Dark mode styling */
+body.dark-mode {
+    background-color: #121212;
+    color: white;
+}
+
+body.dark-mode #chatBox {
+    background-color: #1d1d1d;
+}
+
+body.dark-mode .message-bubble.sent {
+    background-color: #1f8aef;
+}
+
+body.dark-mode .message-bubble.received {
+    background-color: #333;
+}
+
+body.dark-mode button {
+    background-color: #1f8aef;
+}
+
+body.dark-mode button:hover {
+    background-color: #174a78;
+}
+/* Global sozlamalar */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #333;
+    --accent-color: #FF5722;
+    --font-family: 'Arial', sans-serif;
+    --transition-speed: 0.3s;
+}
+
+/* Body va asosiy o'lchamlar */
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f4f4f4;
+    color: var(--secondary-color);
+}
+
+h1, h2, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color var(--transition-speed);
+}
+
+nav ul li a:hover {
+    color: var(--accent-color);
+}
+
+/* Content */
+main {
+    padding: 40px 20px;
+}
+
+.content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.content:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.cta-button:hover {
+    background-color: var(--accent-color);
+}
+
+/* Footer */
+footer {
+    background-color: var(--secondary-color);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Responsiv dizayn - media queries */
+@media (max-width: 768px) {
+    header {
+        text-align: left;
+        padding: 15px;
+    }
+
+    nav ul {
+        text-align: center;
+    }
+
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .cta-button {
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 10px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .cta-button {
+        padding: 10px 15px;
+    }
+
+    footer {
+        font-size: 12px;
+    }
+}
+/* Global sozlamalar */
+:root {
+    --primary-color: #0088cc;   /* Telegram blue */
+    --background-color: #f4f7f7;
+    --sender-bg-color: #dcf8c6; /* Sender message color */
+    --receiver-bg-color: #ffffff; /* Receiver message color */
+    --text-color: #333;
+    --font-family: 'Arial', sans-serif;
+    --border-radius: 20px;
+    --message-padding: 15px;
+    --message-margin: 10px;
+}
+
+/* Body va asosiy o'lchamlar */
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Chat konteyneri */
+.chat-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Xabarlarning umumiy shakli */
+.message {
+    max-width: 80%;
+    padding: var(--message-padding);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    line-height: 1.4;
+    position: relative;
+    word-wrap: break-word;
+    box-sizing: border-box;
+}
+
+/* Xabar yuboruvchi (sender) */
+.message.sender {
+    background-color: var(--sender-bg-color);
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.sender p {
+    margin: 0;
+}
+
+/* Xabar oluvchi (receiver) */
+.message.receiver {
+    background-color: var(--receiver-bg-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.message.receiver p {
+    margin: 0;
+}
+
+/* Hover effekti */
+.message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+/* Responsive dizayn */
+@media (max-width: 768px) {
+    .chat-container {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .message {
+        max-width: 95%;
+    }
+}

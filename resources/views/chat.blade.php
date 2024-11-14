@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+{{--@dd(base_path(('assets/css/chat.css')))--}}
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/chat.css') }}">
+@endsection
+
 @section('sidebar')
     <div class="w-full md:w-1/4 p-6 bg-gradient-to-br from-indigo-200 to-blue-400 border-r border-gray-300 h-screen shadow-xl dark:bg-gray-800 dark:border-gray-600 overflow-y-auto">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Foydalanuvchilar</h2>
@@ -37,6 +42,7 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/js/chat.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -55,7 +61,7 @@
                     document.querySelectorAll('.user-item').forEach(item => {
                         item.classList.remove('bg-indigo-500', 'text-white');
                         item.classList.add('bg-gray-100');
-                        item.querySelector('.unread-count').textContent = ''; // O'qilmagan xabarlar sonini tozalash
+                        item.querySelector('.unread-count').textContent = '';
                     });
                     this.classList.add('bg-indigo-500', 'text-white');
                     chatBox.classList.remove('hidden');
@@ -147,7 +153,6 @@
                     axios.get(`/messages/long-polling/${userId}`)
                         .then(response => {
                             const newMessage = response.data.message;
-                            // Agar yangi xabar mavjud bo'lsa va uni yuborgan foydalanuvchining ID-si hozirgi foydalanuvchi ID-siga teng bo'lmasa
                             if (newMessage && newMessage.sender_id !== {{ Auth::id() }}) {
                                 playNotificationSoundWhenLoadMessage();
                                 addMessageToChat(newMessage, 'justify-start', 'bg-gray-300', 'text-gray-800');
